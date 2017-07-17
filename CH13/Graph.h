@@ -1,3 +1,5 @@
+#include "fltk.h"
+
 //------------------------------------------------------------ Color
 
 struct Color{
@@ -28,20 +30,23 @@ struct Color{
 
 	};
 
-	Color(Color_type cc): c(Fl_Color(cc)), v(visible){}
-	Color(Color_type cc, Transparency vv): c(Fl_Color(cc)), v(vv){}
-	Color(int cc): c(Fl_Color(cc)), v(visible){}
-	Color(Transparency vv): c(Fl_Color()), v(vv){} // default color
+	// constructors
+	Color(Color_type cc)
+		: c(Fl_Color(cc)), v(visible){}
+	Color(Color_type cc, Transparency vv)
+		: c(Fl_Color(cc)), v(vv){}
+	Color(int cc)
+		: c(Fl_Color(cc)), v(visible){}
+	Color(Transparency vv)
+		: c(Fl_Color()), v(vv){} // default color
 
-	int as_int() const {return c;}
-	char visibility() const {return v;}
+	int as_int() const { return c; } // return Fl_Color as int
+	char visibility() const { return v; }
 	void set_visibility(Transparency vv){ v=vv; }
-
 
 private:
 	char v;
 	Fl_Color c; // FLTK's Fl_Color type
-
 
 }
 
@@ -58,18 +63,76 @@ struct Line_style{
 		dashdotdot = FL_DASHDOTDOT
 	};
 
-	Line_style(Line_style_type ss): s(ss), w(0){}
-	Line_style(Line_style_type lst): s(lst), w(ww){}
-	Line_style(int ss): s(ss), w(0){}
+	// constructors
+	Line_style(Line_style_type ss)
+		: s(ss), w(0){}
+	Line_style(Line_style_type ss, int ww)
+		: s(ss), w(ww){}
+	Line_style(int ss)
+		: s(ss), w(0){}
 
-	int width() const:{ return w;}
-	int style() const:{ return s;} 
+	int width() const { return w; }
+	int style() const { return s; } 
 
 private:
 	int s;
 	int w;
 
 };
+
+//------------------------------------------------------------ Shape
+
+class Shape{
+
+public:
+
+    // set and read
+	void set_color(Color col);
+	Color color() const;
+	void set_style(Line_style sty);
+	Line_style style() const; 
+	void set_fill_color(Color col);
+	Color fill_color() const;
+
+	Point point(int i) const; // read points[i]
+	int number_of_points() const;
+
+	void draw() const; // set styles, colors, and call draw_lines
+	virtual void move(int dx, int dy);
+	
+	
+	Shape(const Shape&) = delete;
+
+	Shape& operator=(const Shape&) = delete;
+
+	virtual ~Shape(){} // a virtual destructor; Chapter 17.5.2
+
+protected:
+
+	void add(Point p); // protected
+	void set_point(int i, Point p); // points[i] = p // protected
+
+	virtual void draw_lines() const; // draw lines (pixels on the screen)
+	                                 // will be overridden
+
+	// constructors (protected)
+	Shape(){} 
+	Shape{initializer_list<Point> lst};
+
+private:
+	vector<Point> points; // a vector of points
+	Color lcolor{fl_color()}; // lcolor: for lines and texts
+	Line_style ls{0};
+	Color fcolor{Color::invisible}; // fcolor: for filling
+};
+
+Shape::Shape(initializer_list<Point> lst){ // initializer_list constructor
+	for(Point p: list) add(p);
+}
+
+
+
+
 
 
 //------------------------------------------------------------ Line
@@ -99,7 +162,6 @@ struct Lines: Shape{
 									   //          {{100,100},{200,100}},
 									   //          {{150,50},{150,150}}
                                        //  };
-
 	void draw_lines() const; // const: can be called by a const object
 	void add(Point p1, Point p2);
 
@@ -118,14 +180,6 @@ void Lines:add(Point p1, Point p2){
 
 }
 
-void Lines::draw_lines() const{  
-
-	if(color().visibility()) // property of Lines' Color object
-		for(int i=1; i<number_of_points(); i+=2) // number_of_points is defined in Shape
-			fl_line(point(i-1).x,point(i-1).y,point(i).x,point(i).y); // line drawing funciton 
-																	  // from the underlying library
-
-}
 
 //----------------------------------------------------------- Open_polyline
 
@@ -462,13 +516,18 @@ private:
 
 	};
 
+	bool can_open(const string& s){
+		ifstream ff(s);
+		return ff;
+	}
+
 	struct Image: Shape{
 
 		Image(Point xy, string file_name, Suffix::Encoding e = Suffix::none);
 		~Image(){ delete p;}
 
 		void draw_lines() const;
-		voide set_mask(Point xy, int ww, int hh){
+		void set_mask(Point xy, int ww, int hh){
 			w = ww; 
 			h = hh; 
 			cx = xy.x; 
@@ -485,5 +544,32 @@ private:
 
 	Image::Image(Point xy, string s, Suffix e)
 		: w{0}, h{0}, fn{xy,""}{
-			
+
+			add(xy);
+
+			if(!can_open(s)){
+				fn.set_label("cannot open \""+s+'"');
+				p = new Bad_image(30,20);
+				return;
+			}
+
+			if(e==Suffix::none) e = get_encoding(s);
+
+			switch(e){ // check if it is a known encoding
+				case Suffix::jpg:
+					p = new Fl_JPEG_Image{s.ctr()};
+					break;
+				case Suffix::gif:
+					p = new Fl_GIF_Image{s.ctr()};
+					break;
+				default: // unsupported image encoding
+					fn.set_label("unsupported file tyle\""+s+'"');
+					p = new Bad_image{30,20};
+
+
+
+			}
+
+
+
 		}
