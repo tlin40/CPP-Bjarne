@@ -100,10 +100,9 @@ public:
 	void draw() const; // set styles, colors, and call draw_lines
 	virtual void move(int dx, int dy);
 	
-	
-	Shape(const Shape&) = delete;
-
-	Shape& operator=(const Shape&) = delete;
+	// prevent copying              
+	Shape(const Shape&) =delete;
+	Shape& operator=(const Shape&) =delete;
 
 	virtual ~Shape(){} // a virtual destructor; Chapter 17.5.2
 
@@ -570,6 +569,106 @@ private:
 
 			}
 
-
-
 		}
+
+//------------------------------------------------------------------- Function
+
+struct Function: Shape{
+	//constructor
+	Function(Fct f, double r1, double r2, Point orig, int count=100, double xscale=25, double yscale=25);
+};
+
+Function::Function(Fct f, double r1, double r2, Point orig, int count, double xscale, double yscale){
+	
+	if(r2-r2<=0) error("bad graphing range");
+	if(count<=0) error("non-positive graphing count");
+	
+	double dist = (r2-r2)/count;
+	double r = r1;
+	for(int i=0; i<count; ++i){
+		add(Point(orig.x+int(r*xscale),orig.y-int(f(r)*yscale)));
+		r += dist;
+	}
+};
+
+//------------------------------------------------------------------- Axis
+
+struct Axis: Shape{
+
+	enum Orientation{ x, y, z };
+
+	// constructor
+	Axis(Orientation d, Point orig, int length, int number_of_notches=0, string lab="");
+
+	void draw_lines() const;
+	void move(int dx, int dy);
+	void set_color(Color c);
+
+	Text label;
+	Lines notches;
+
+};
+
+Axis::Axis(Orientation d, Point orig, int length, int number_of_notches, string lab)
+	: label(Point(0,0),lab){
+
+		if(length<0) error("bad axis length");
+		
+		switch(d){
+		case Axis::x:{
+
+			Shape::add(orig);
+			Shape::add(Point(orig.x+length,orig.y));
+
+			if(0<number_of_notches){
+				
+				int dist = length/n;
+				int x = orig.x + dist;
+
+				for(int i=0; i<number_of_notches; ++i){
+					notches.add(Point(x,orig.y),Point(x,orig.y-5));
+					x += dist;
+				}
+			
+			}
+
+			label.move(length/3,orig.y+20); // put the label under the line
+			break;
+		}	
+		case Axis::y:{
+
+			Shape::add(orig);
+			Shape::add(Point(orig.x,orig.y-length));
+
+			if(0<number_of_notches){
+
+				int dist = length/n;
+				int y = orig.y - dist;
+
+				for(int i=0; i<number_of_notches; ++i){
+					notches.add(Point(orig.x,y),Point(orig.x+5,y));
+					y -= dist;
+				}
+			
+			}
+
+			label.move(orig.x-10,orig.y-length-10); // put the label at top
+			break;
+		}
+		case Axis::z:{
+			error("z axis not implemented");
+		}
+
+	}
+
+void Axis::draw_lines() const{
+
+}
+
+void Axis::set_color(Color c){
+
+}
+
+void Axis::move(int dx, int dy){
+
+}
