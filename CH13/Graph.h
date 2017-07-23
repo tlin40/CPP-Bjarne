@@ -598,7 +598,7 @@ struct Axis: Shape{
 	enum Orientation{ x, y, z };
 
 	// constructor
-	Axis(Orientation d, Point orig, int length, int number_of_notches=0, string lab="");
+	Axis(Orientation d, Point xy, int length, int number_of_notches=0, string lab="");
 
 	void draw_lines() const;
 	void move(int dx, int dy);
@@ -609,7 +609,7 @@ struct Axis: Shape{
 
 };
 
-Axis::Axis(Orientation d, Point orig, int length, int number_of_notches, string lab)
+Axis::Axis(Orientation d, Point xy, int length, int number_of_notches, string lab)
 	: label(Point(0,0),lab){
 
 		if(length<0) error("bad axis length");
@@ -617,42 +617,42 @@ Axis::Axis(Orientation d, Point orig, int length, int number_of_notches, string 
 		switch(d){
 		case Axis::x:{
 
-			Shape::add(orig);
-			Shape::add(Point(orig.x+length,orig.y));
+			Shape::add(xy);
+			Shape::add(Point(xy.x+length,xy.y));
 
 			if(0<number_of_notches){
 				
 				int dist = length/n;
-				int x = orig.x + dist;
+				int x = xy.x + dist;
 
 				for(int i=0; i<number_of_notches; ++i){
-					notches.add(Point(x,orig.y),Point(x,orig.y-5));
+					notches.add(Point(x,xy.y),Point(x,xy.y-5));
 					x += dist;
 				}
 			
 			}
 
-			label.move(length/3,orig.y+20); // put the label under the line
+			label.move(length/3,xy.y+20); // put the label under the line
 			break;
 		}	
 		case Axis::y:{
 
-			Shape::add(orig);
-			Shape::add(Point(orig.x,orig.y-length));
+			Shape::add(xy);
+			Shape::add(Point(xy.x,xy.y-length));
 
 			if(0<number_of_notches){
 
 				int dist = length/n;
-				int y = orig.y - dist;
+				int y = xy.y - dist;
 
 				for(int i=0; i<number_of_notches; ++i){
-					notches.add(Point(orig.x,y),Point(orig.x+5,y));
+					notches.add(Point(xy.x,y),Point(xy.x+5,y));
 					y -= dist;
 				}
 			
 			}
 
-			label.move(orig.x-10,orig.y-length-10); // put the label at top
+			label.move(xy.x-10,xy.y-length-10); // put the label at top
 			break;
 		}
 		case Axis::z:{
@@ -661,14 +661,50 @@ Axis::Axis(Orientation d, Point orig, int length, int number_of_notches, string 
 
 	}
 
-void Axis::draw_lines() const{
+void Axis::draw_lines() const{ 
+	
+	// not only draws lines, but notches and label as well
+	Shape::draw_lines(); 
+	notches.draw();
+	label.draw();
 
 }
 
-void Axis::set_color(Color c){
+void Axis::set_color(Color c){ 
+	
+	// not only sets lines, but notches and label as well
+	Shape::set_color(c);
+	notches.set_color(c);
+	label.set_color(c);
 
 }
 
 void Axis::move(int dx, int dy){
 
+	// not only moves lines, but notches and label as well
+	Shape::move(dx,dy);
+	notches.move(dx,dy);
+	label.move(dx,dy); 
+
 }
+
+//---------------------------------------------------------------------------- Distribution
+
+
+struct Distribution{
+	int year, young, middle, old;
+};
+
+istream& operator>>(istream& is, Distribution& d);
+
+class Scale{
+
+	int cbase;
+	int vbase;
+	double scale;
+public:
+	Scale(int b, int vb, double s) // constructor
+		: cbase(b), vbase(vb), scale(s){}
+	int operator()(int v) const { return cbase + (v-vbase)*scale; } // chapter 21.4
+
+};
