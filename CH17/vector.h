@@ -1,6 +1,6 @@
 #include "std_lib_facilities.h"
 
-
+template<typename T> // prefix
 class vvector{
 
 	/* 
@@ -11,7 +11,7 @@ class vvector{
 	*/
 
 	int sz;
-	double* elem;
+	T* elem;
 	int space; // number of elements + "free space"/"slots"
 
 public:
@@ -22,15 +22,15 @@ public:
 
 	// constructor
 	explicit vvector(int s) // allocates s doubles
-		:sz{s}, elem{new double[s]}, space{s}{
+		:sz{s}, elem{new T[s]}, space{s}{
 			// initialization
 			for(int i=0; i<s; ++i) elem[i] = 0; 
 	
 	}
 
 	// constructor (initializer_list)
-	vvector(initializer_list<double> lst)
-		: sz(lst.size()), elem{new double[sz]}, space{sz}{
+	vvector(initializer_list<T> lst)
+		: sz(lst.size()), elem{new T[sz]}, space{sz}{
 			// initialization using std::copy B.5.2
 			copy(lst.begin(),lst.end(),elem); 
 	
@@ -56,11 +56,11 @@ public:
 	//------------------------------------------------ functions
 
 	// using [] notation
-	double& operator[](int n){ // non-const version
+	T& operator[](int n){ // non-const version
 		return elem[n];
 	}
 
-	double operator[](int n) const{ // const version
+	T operator[](int n) const{ // const version
 		return elem[n];
 	};
 
@@ -83,20 +83,20 @@ public:
 
 	void resize(int newsize); // newsize (elements are initialized)
 	
-	void push_back(double d);
+	void push_back(T d);
 
 };
 
 
-vvector::vvector(const vvector& arg) 
+template<typename T> vvector<T>::vvector(const vvector& arg) 
 	// allocate elements and initializa by std::copy
-	:sz{arg.sz}, elem{new double[arg.sz]}, space{sz}{
+	:sz{arg.sz}, elem{new T[arg.sz]}, space{sz}{
 		copy(arg.elem, arg.elem+arg.sz, elem); // B.5.2
 
 }
 
 
-vvector& vvector::operator=(const vvector& a){
+template<typename T> vvector<T>& vvector<T>::operator=(const vvector& a){
 
 	if(this==&a) return *this; // self-assignment, no work needed
 
@@ -109,7 +109,7 @@ vvector& vvector::operator=(const vvector& a){
 	}
 
 	// make this vector a copy of a
-	double* p = new double[a.sz]; // allocate new space
+	T* p = new T[a.sz]; // allocate new space
 	// for(int i=0; i<a.sz; ++i) p[i] = a.elem[i];
 	copy(a.elem, a.elem+a.sz, p); // copy elements
 
@@ -121,7 +121,7 @@ vvector& vvector::operator=(const vvector& a){
 
 }
 
-vvector::vvector(vvector&& a)
+template<typename T> vvector<T>::vvector(vvector&& a)
 	:sz{a.sz}, elem{a.elem}, space{sz}{
 		
 		a.space = a.sz = 0; // clear
@@ -129,7 +129,7 @@ vvector::vvector(vvector&& a)
 
 }
 
-vvector& vvector::operator=(vvector&& a){ // move a to this vector
+template<typename T> vvector<T>& vvector<T>::operator=(vvector&& a){ // move a to this vector
 
 	delete[] elem; // clear
 	
@@ -142,3 +142,4 @@ vvector& vvector::operator=(vvector&& a){ // move a to this vector
 	return *this;
 
 }
+
