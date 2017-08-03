@@ -1,5 +1,6 @@
 #include "std_lib_facilities.h"
 
+
 struct my_out_of_range{}; // class used to report range access errors
 
 template<typename T, typename A = allocator<T>> struct vvector_base{
@@ -9,9 +10,11 @@ template<typename T, typename A = allocator<T>> struct vvector_base{
 	int sz;
 	int space;
 
+	// constructors
 	vvector_base(const A& a, int n)
 		: alloc{a}, elem{a.allocate(n)}, sz{n}, space(n){}
 
+	// destructors
 	~vvector_base(){
 		alloc.deallocate(elem,space);
 	}
@@ -95,7 +98,7 @@ public:
 };
 
 
-template<typename T, typename A> vvector<T,A>::vvector(const vvector& arg) 
+template<typename T, typename A> vvector<T,A>::vvector(const vvector& arg) // copy constructor
 	// allocate elements and initialize by std::copy
 	:vvector::sz{arg.sz}, vvector::elem{vvector::alloc.allocate(arg.sz)}, vvector::space{vvector::sz}{
 		copy(arg.elem, arg.elem+arg.sz, vvector::elem); // B.5.2
@@ -103,7 +106,7 @@ template<typename T, typename A> vvector<T,A>::vvector(const vvector& arg)
 }
 
 
-template<typename T, typename A> vvector<T,A>& vvector<T,A>::operator=(const vvector& a){
+template<typename T, typename A> vvector<T,A>& vvector<T,A>::operator=(const vvector& a){ // copy assignment
 
 	if(this==&a) return *this; // self-assignment, no work needed
 
@@ -116,18 +119,20 @@ template<typename T, typename A> vvector<T,A>& vvector<T,A>::operator=(const vve
 	}
 
 	// make this vector a copy of a
-	T* p = this->alloc.allocate(a.sz); // allocate new space
-	copy(a.elem, a.elem+a.sz, p); // copy elements
+	vvector_base<T,A> b(this->alloc,a.sz);
+	uninitialized_copy(a.elem,a.elem+a.sz,b.elem);
 
-	this->alloc.deallocate(this->elem, this->space);
+	for(int i=0; i<this->sz; ++i)
+		this->alloc.destroy(&this->elem[i]); 
+	this->alloc.deallocate(this->elem,this->space);// deallocate old space
 
-	this->elem = p;
-	this->space = this->sz = a.sz;
+	swap<vvector_base<T,A>>(*this,b); // swap representations
+
 	return *this;
 
 }
 
-template<typename T, typename A> vvector<T,A>::vvector(vvector&& a)
+template<typename T, typename A> vvector<T,A>::vvector(vvector&& a) // move constructor
 	:vvector::sz{a.sz}, vvector::elem{a.elem}, vvector::space{vvector::sz}{
 		
 		a.space = a.sz = 0; // clear

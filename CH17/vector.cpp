@@ -14,12 +14,13 @@ template<typename T, typename A> const T& vvector<T,A>::at(int n) const{
 
 }
 
+/*
 template<typename T, typename A> void vvector<T,A>::reserve(int newalloc){
 
 	if(newalloc<=this->space) return; // never decrease allocation
 	
 	vvector_base<T,A> b(this->alloc,newalloc); // allocate new space
-	uninitialized_copy(this->elem,this->elem[this->sz],b.elem);// copy: uninitialized_copy can handle the throw
+	uninitialized_copy(this->elem,this->elem+this->sz,b.elem); // copy: uninitialized_copy can handle the throw
 
 	for(int i=0; i<this->sz; ++i)
 		this->alloc.destroy(&this->elem[i]); 
@@ -28,6 +29,7 @@ template<typename T, typename A> void vvector<T,A>::reserve(int newalloc){
 	swap<vvector_base<T,A>>(*this,b); // swap representations
 
 }
+*/
 
 template<typename T, typename A> void vvector<T,A>::resize(int newsize, T val){
 	// that is, use T() as the default value unless the user says otherwise
@@ -53,6 +55,18 @@ template<typename T, typename A> void vvector<T,A>::push_back(const T& val){
 
 	this->alloc.construct(&this->elem[this->sz],val);
 	++this->sz;
+
+}
+
+//--------------------------------------------------- reserve (unique_ptr)
+template<typename T, typename A> void vvector<T,A>::reserve(int newalloc){
+	
+	if(newalloc<=this->space) return;
+
+	unique_ptr<vvector_base<T,A>> p{new vvector_base<T,A>(this->alloc,newalloc)};
+	uninitialized_copy(this->elem,this->elem+this->sz,p->elem);
+
+	swap<vvector_base<T,A>>(*this,*p);
 
 }
 
