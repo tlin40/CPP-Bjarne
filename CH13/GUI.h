@@ -1,186 +1,146 @@
+#ifndef GUI_GUARD
+#define GUI_GUARD 1
+
 #include "Graph.h"
 
-//-------------------------------------------------------------------- widget
-class Widget{ // Widget is a handle to an Fl_widget
-public:
-	Widget(Point xt, int w, int h, const string& s, Callback cb);
+namespace Graph_lib{
 
-	virtual void move(int dx, int dy); // moves the widget
-	virtual void hide(); // makes the widget invisible
-	virtual void show(); // makes the widget visible (default)
-	virtual void attach(Window&) = 0; // pure virtual function
+	class Window; // forward declare
 
-	Point loc;
-	int width;
-	int height;
-	string label;
-	Callback do_int;
+	typedef void* Address; // using Address as void*; void* is a pointer doesn't know what it points to
+	typedef void (*Callback)(Address, Address);
+	// introduce a function pointer called Callback
+	 // here the function is a void function and takes arguments as Address, Address
+	 // example: Callback pf = &f; *pf(addr, addr);
 
-protected:
-	Window* own; // every widget belongs to a window
-	Fl_Widget* pw; // connecton to the FLTK Widget
-
-};
-
-//-------------------------------------------------------------------- button
-struct Button: Widget{
-
-	Button(Point xy, int ww, int hh, const string& z, Callback cb)
-		:Widget(xy, ww, hh, s, cb){}
-
-	void attach(Window& win);
-};
-
-//-------------------------------------------------------------------- In_box
-
-struct In_box: Widget{ // accept text typed into it
-
-	In_box(Point xy, int ww, int hh, const string& s)
-		: Widget(xy, ww, hh, s, 0){}
-
-	int get_int();
-	
-	string get_string();
-
-	void attach(Window& win);
-
-};
-
-//-------------------------------------------------------------------- Out_box
-
-struct Out_box: Widget{ // present some message to a user
-
-	Out_box(Point xy, int ww, int hh, const string& s)
-		:Widget(xy, ww, hh, s, 0){}
-
-	void put(int);
-
-	void put(const string&); // ???
-
-	void attach(Window& win);
-
-};
-
-//-------------------------------------------------------------------- Menu
-
-struct Menu: Widget{ // basically a vector of Buttons
-
-	Menu(Point xy, int ww, int hh, Kind kk, const string& s);
-
-	enum Kind{ horizontal, vertical };
-
-	// data
-	Vector_ref<Button> selection;
-	Kind k;
-	int offset;
-	int attach(Button& b); // attach Button to Menu
-	int attach(Button* p); // attach new Button to Menu
-
-	// virtual
-	void show(){ // show all buttons
-
-		for(Button& b: selection) b.show();
-
+	template<typename W> W& reference_to(Address addr){
+		return *static_cast<W*>(addr);
 	}
 
-	void hide(); // hide all buttons
+	//--------------------------------------------------------------- Widget
+	class Widget{ // Widget is a handle to Fl_Widget
+		public:
+			// constructor
+			Widget(Point xy, int ww, int hh, const string& ss, Callback cb)
+				:loc(xy), width(ww), height(hh), label(ss), do_int(cb){}
 
-	void move(int dx, int dy); // move all buttons
+			// virtuals
+			//virtual void move(int dx, int dy); // move the Widget
+			//virtual void hide(); // make the Widget invisible
+			//virtual void show(); // make the Widget visible (default)
+			virtual void attach(Window&) = 0; // pure virtual function
+			//virtual void draw();
 
-	void attach(Window& win); // attach all buttons to Window win
+			Point loc;
+			int width;
+			int height;
+			string label;
+			Callback do_int;
 
-};
+		protected:
+			Window* own; // every Widget belongs to a Window
+			Fl_Widget* pw; // connection to Fl_Widget
 
-//--------------------------------------------------------------------- Lines_window
+	};
 
-struct Lines_window: Window{
 
-	Lines_window(Point xy, int ww, int hh, const string& title);
+	//--------------------------------------------------------------- Button
+	struct Button: Widget{
 
-private:
+		// constructor
+		Button(Point xy, int ww, int hh, const string& ss, Callback cb)
+			:Widget(xy, ww, hh, ss, cb){}
 
-	// data
-	Open_polyline lines;
+		// function
+		//void attach(Window& w);
 
-	// widgets
-	Menu color_menu;
-	Button menu_button;
-	Button next_button; // add (next_x,next_y) to lines
-	Button quit_button;
-	In_box next_x;
-	In_box next_y;
-	Out_box xy_out;
+	};
 
-	void change(Color c){
-		lines.set_color(c);
-	}
 
-	void hide_menu(){
+	//--------------------------------------------------------------- In_box
+	struct In_box: Widget{
 
-		color_menu.hide();
-		menu_button.show();
+		// constructor
+		//In_box(Point xy, int ww, int hh, const string& ss)
+		//	:Widget(xy, ww, hh, ss, 0){}
 
-	}
+		//int get_int();
 
-	// callbacks
-	static void cb_red(Address, Address); // callback for red button
-	static void cb_blue(Address, Address);
-	static void cb_black(Address, Address);
-	static void cb_menu(Address, Address);
-	static void cb_next(Address, Address);
-	static void cb_quit(Address, Address);
+		//string get_string();
 
-	// actions
-	void red_pressed(){
-		change(Color::red);
-		hide_menu();
-	}
+		//void attach(Window& w);
 
-	void blue_pressed(){
-		change(Color::blue);
-		hide_menu();
-	}
+	};
 
-	void black_pressed(){
-		Change(Color::black);
-		hide_menu();
-	}
 
-	void menu_pressed(){
-		menu_button.hide();
-		color_menu.show();
-	}
+	//--------------------------------------------------------------- Out_box
 
-	void next();
+	struct Out_box: Widget{ // present some message to users
 
-	void quit(); // to delete the Window
+		// constructor
+//		Out_box(Point xy, int ww, int hh, const string& ss)
+//			:Widget(xy, ww, hh, ss, 0){}
 
-};
+//		void put(int);
 
-Lines_window::Lines_window(Point xy, int ww, int hh, const string& title){
-	:Window{xy, ww, hh, title}, 
-	 next_button{Point{x_max()-150,0}, 70, 20, "Next point", cb_next/*[](Address, Address pw){ reference_to<Lines_window>(pw).next(); }*/},
-	 quit_button{Point{x_max()-70,0}, 70, 20, "Quit", cb_quit /*[](Address, Address pw){ reference_to<Lines_window>(pw).quit(); }*/}, 
-	 next_x{Point{x_max()-310,0}, 50, 20, "next x:"}, 
-	 next_y{Point{x_max()-210,0}, 50, 20, "next y:"}, 
-	 xy_out{Point{100,0}, 100, 20, "current (x,y):"},
-	 color_menu{Point(x_max()-70,30), 70, 20, Menu::vertical, "color"},
-	 menu_button{Point(x_max()-80,30), 80, 20, "color menu", "color"}{
+//		void put(const string&);
 
-	 	color_menu.attach(new Button(Point(0,0), 0, 0, "red", cb_red));
-	 	color_menu.attach(new Button(Point(0,0), 0, 0, "blue", cb_blue));
-	 	color_menu.attach(new Button(Point(0,0), 0, 0, "black", cb_black));
+//		void attach(Window& w);
 
-	 	attach(next_button);
-	 	attach(quit_button);
-	 	attach(next_x);
-	 	attach(next_y);
-	 	attach(xy_out);
-	 	xy_out.put("no point");
-	 	attach(lines);
-	 	attach(menu_button);
-	 	attach(color_menu);
-	 	color_menu.hide();
+	};
 
-	}
 
+	//--------------------------------------------------------------- Menu
+	 // basically a vector of Buttons
+	struct Menu: Widget{
+
+		void hide(){
+
+		};
+
+		/*
+
+		// constructor
+		Menu::Menu(Point xy, int ww, int hh, Kind kk, const string& ss)
+			:Widget(xy,ww,hh,ss,0), k(kk), offest(0){}
+
+		//data
+		enum Kind{ horizontal, vertical };
+		Kind k;
+		int offset;
+		Vector_ref<Button> selection;
+
+		//int attach(Button& b);
+
+		//int attach(Button* p);
+
+		// virtuals 
+		void move(int dx, int dy){ // move all buttons
+			for(Button& b: selection) b.move(dx,dy);
+		} 
+
+		void show(){ // show all buttons
+			for(Button& b: selection) b.show();
+		}
+
+		// functions
+
+		void hide(){ // hide all buttons
+			for(Button& b: selection) b.hide();
+
+		}
+
+		void attach(Window& w){ // attach all buttons to Window
+			for(Button& b: selection) w.attach(b);
+			own = &w;
+		}
+
+		*/
+
+
+	};
+
+
+}
+
+#endif

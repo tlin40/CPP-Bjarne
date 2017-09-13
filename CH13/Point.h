@@ -1,18 +1,34 @@
-struct Point{
+#ifndef POINT_GUARD
+#define POINT_GUARD
 
-	int x;
-	int y;
+namespace Graph_lib{
 
-	Point(int xx, int yy): x(xx), y(yy){}
-	Point(): x(0), y(0){}
-};
+	//------------------------------------------ Point
+	struct Point{
 
-//------------------------------------------
+		// coordinates
+		int x;
+		int y;
 
-bool operator==(Point a, Point b){
-	return a.x==b.x && a.y==b.y;
+		// default constructor
+		Point()
+			:x(0), y(0){}
+
+		// constructor
+		Point(int xx, int yy)
+			:x(xx), y(yy){}
+
+	};
+
+	//------------------------------------------ operators for Points
+	bool operator==(Point a, Point b){
+		return a.x==b.x && a.y==b.y;
+	}
+
+	bool operator!=(Point a, Point b){
+		return !(a==b);
+	}
+
 }
 
-bool operator!=(Point a, Point b){
-	return !(a==b);
-}
+#endif
