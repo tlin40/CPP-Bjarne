@@ -77,6 +77,37 @@ namespace Graph_lib{
 		return ff;
 	}
 
+	map<string,Suffix::Encoding> suffix_map;
+
+	int init_suffix_map(){
+
+		suffix_map["jpg"] = Suffix::jpg;
+		suffix_map["JPG"] = Suffix::jpg;
+		suffix_map["jpeg"] = Suffix::jpg;
+		suffix_map["JPEG"] = Suffix::jpg;
+		
+		suffix_map["gif"] = Suffix::gif;
+		suffix_map["GIF"] = Suffix::gif;
+		
+		suffix_map["bmp"] = Suffix::bmp;
+		suffix_map["BMP"] = Suffix::bmp;
+
+		return 0; 
+
+	}
+
+	Suffix::Encoding get_encoding(const string& s){
+		// try to deduce type
+		static int x = init_suffix_map(); // initialize suffix_map once
+
+		string::const_iterator p = find(s.begin(),s.end(),'.'); // to find '.' in the range [first,last)
+		if(p==s.end()) return Suffix::none;
+
+		string suf{p+1,s.end()}; // range constructor [first,last)
+		return suffix_map[suf];
+
+	}
+
 	//------------------------------------------------------- Color
 	struct Color{
 
@@ -550,6 +581,9 @@ namespace Graph_lib{
 		Image(Point xy, string file_name, Suffix::Encoding e = Suffix::none);
 
 		// destructor
+		~Image(){
+			delete p;
+		}
 
 		// funcitons
 		void set_mask(Point xy, int ww, int hh);
@@ -566,18 +600,43 @@ namespace Graph_lib{
 
 	 // constructor
 	Image::Image(Point xy, string file_name, Suffix::Encoding e)
+		: w{0}, h{0}, fn{xy,""}{
 
-	//----------------------------------------------------- Function
-	struct Function: Shape{
+			add(xy);
 
-	};
+			if(!can_open(s)){
 
-	//----------------------------------------------------- Axiss
+				fn.set_label("cannot open \""+s+'"');
+				p = new Bad_image(30,20); // struct Bad_image
+				return;
+
+			}
+			if(e==Suffix::none) e = get_encoding(s); // if can_open and didn't specify e
+
+			switch(e){
+
+				case Suffix::jpg:
+					p = new Fl_JPEG_Image{s.c_str()};
+				break;
+
+				case Suffix::gif:
+					p = new Fl_GIF_Image{s.c_str()};
+				break;
+
+				default:
+					fn.set_label("unsupported file style\""+s+'"');
+					p = new Bad_image(30,20);
+
+			}
+	}
+
+	//----------------------------------------------------- Axis
 	struct Axis: Shape{
 
 		enum Orientation{ x, y, z};
 
 		// constructor
+		Axis(Orientation d, Point xy, int length, int number_of_notches=0, string lab="");
 
 		// functions
 		void move(int dx, int dy);
@@ -593,76 +652,20 @@ namespace Graph_lib{
 	};
 
 	 // constructor
-	Axis::Axis
-	
-}
+	Axis::Axis(Orientation d, Point xy, int number_of_notches, string lab)
+		: label{Point(0,0),lab}{
 
-//----------------------------------------------------------- Images
+	}
 
-	struct Image: Shape{
+	//----------------------------------------------------- Function
+	struct Function: Shape{
 
-		~Image(){ delete p;}
+		// constructor
 
 	};
 
-	Image::Image(Point xy, string s, Suffix e)
-		: w{0}, h{0}, fn{xy,""}{
-
-			add(xy);
-
-			if(!can_open(s)){
-				fn.set_label("cannot open \""+s+'"');
-				p = new Bad_image(30,20);
-				return;
-			}
-
-			if(e==Suffix::none) e = get_encoding(s);
-
-			switch(e){ // check if it is a known encoding
-				case Suffix::jpg:
-					p = new Fl_JPEG_Image{s.ctr()};
-					break;
-				case Suffix::gif:
-					p = new Fl_GIF_Image{s.ctr()};
-					break;
-				default: // unsupported image encoding
-					fn.set_label("unsupported file tyle\""+s+'"');
-					p = new Bad_image{30,20};
-
-
-
-			}
-
-		}
-
-//------------------------------------------------------------------- Function
-
-struct Function: Shape{
-	//constructor
-	Function(Fct f, double r1, double r2, Point orig, int count=100, double xscale=25, double yscale=25);
-};
-
-Function::Function(Fct f, double r1, double r2, Point orig, int count, double xscale, double yscale){
-	
-	if(r2-r2<=0) error("bad graphing range");
-	if(count<=0) error("non-positive graphing count");
-	
-	double dist = (r2-r2)/count;
-	double r = r1;
-	for(int i=0; i<count; ++i){
-		add(Point(orig.x+int(r*xscale),orig.y-int(f(r)*yscale)));
-		r += dist;
-	}
-};
 
 //------------------------------------------------------------------- Axis
-
-struct Axis: Shape{
-
-	// constructor
-	Axis(Orientation d, Point xy, int length, int number_of_notches=0, string lab="");
-
-};
 
 Axis::Axis(Orientation d, Point xy, int length, int number_of_notches, string lab)
 	: label(Point(0,0),lab){
@@ -716,32 +719,31 @@ Axis::Axis(Orientation d, Point xy, int length, int number_of_notches, string la
 
 	}
 
-void Axis::draw_lines() const{ 
+
+}
+
+
+//------------------------------------------------------------------- Function
+
+struct Function: Shape{
+	//constructor
+	Function(Fct f, double r1, double r2, Point orig, int count=100, double xscale=25, double yscale=25);
+};
+
+Function::Function(Fct f, double r1, double r2, Point orig, int count, double xscale, double yscale){
 	
-	// not only draws lines, but notches and label as well
-	Shape::draw_lines(); 
-	notches.draw();
-	label.draw();
-
-}
-
-void Axis::set_color(Color c){ 
+	if(r2-r2<=0) error("bad graphing range");
+	if(count<=0) error("non-positive graphing count");
 	
-	// not only sets lines, but notches and label as well
-	Shape::set_color(c);
-	notches.set_color(c);
-	label.set_color(c);
+	double dist = (r2-r2)/count;
+	double r = r1;
+	for(int i=0; i<count; ++i){
+		add(Point(orig.x+int(r*xscale),orig.y-int(f(r)*yscale)));
+		r += dist;
+	}
+};
 
-}
 
-void Axis::move(int dx, int dy){
-
-	// not only moves lines, but notches and label as well
-	Shape::move(dx,dy);
-	notches.move(dx,dy);
-	label.move(dx,dy); 
-
-}
 
 //---------------------------------------------------------------------------- Distribution
 

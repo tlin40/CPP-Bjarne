@@ -255,6 +255,48 @@ namespace Graph_lib{
 
 	}
 
+	//----------------------------------------------- Axis
+	void Axis::move(int dx, int dy){
+
+	}
+
+	void Axis::set_color(Color c){
+
+	}
+
+	void Axis::draw_lines() const{
+
+	}
+
+
+/*
+void Axis::draw_lines() const{ 
+	
+	// not only draws lines, but notches and label as well
+	Shape::draw_lines(); 
+	notches.draw();
+	label.draw();
+
+}
+
+void Axis::set_color(Color c){ 
+	
+	// not only sets lines, but notches and label as well
+	Shape::set_color(c);
+	notches.set_color(c);
+	label.set_color(c);
+
+}
+
+void Axis::move(int dx, int dy){
+
+	// not only moves lines, but notches and label as well
+	Shape::move(dx,dy);
+	notches.move(dx,dy);
+	label.move(dx,dy); 
+
+}
+
 /*
 
 //--------------------------------------------------- Distribution
