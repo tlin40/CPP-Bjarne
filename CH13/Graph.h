@@ -3,6 +3,62 @@
 
 namespace Graph_lib{
 
+	// Vector_ref
+	 // to handle new
+
+	template<typename T> class Vector_ref{
+
+		// private
+		vector<T*> v;
+		vector<T*> owned;
+
+	public:
+
+		// constructor
+		Vector_ref(){}
+
+		Vector_ref(T* a, T* b=0, T* c=0, T* d=0){
+
+			if(a) push_back(a);
+			if(b) push_back(b);
+			if(c) push_back(c);
+			if(d) push_back(d);
+
+		}
+
+		// destructor
+		~Vector_ref(){
+			for(int i=0; i<owned.size(); ++i){
+				delete owned[i];
+			}
+		}
+
+		// functions
+		void push_back(T& s){ // add a named Shape
+			v.push_back(&s);
+		}
+		
+		void push_back(T* p){ // add an unnamed Shape
+			v.push_back(p);
+			owned.push_back(p);
+		}
+
+		T& operator[](int i){
+			return *v[i];
+		}
+
+		T& operator[](int i) const{
+			return *v[i];
+		}
+
+		int size() const{
+			return v.size();
+		}
+
+	};
+
+	typedef double Fct(double); // a typedef of function typpe maybe used to declare a function
+
 	// helper functions
 	 // does two lines (p1, p2) and (p3, p4) intersect?
 	  // if so, return the distances of the intersect point from p1 to p2s and from p3 to p4
@@ -74,7 +130,7 @@ namespace Graph_lib{
 
 	bool can_open(const string& s){
 		ifstream ff{s};
-		return ff;
+		return static_cast<bool>(ff); // here requires explicit conversion
 	}
 
 	map<string,Suffix::Encoding> suffix_map;
@@ -139,16 +195,16 @@ namespace Graph_lib{
 
 		// constructors
 		Color(Color_type cc)
-			: c{Fl_Color{cc}}, v{visible}{} // first convert Color_type to Fl_Color
+			: c{Fl_Color(cc)}, v(visible){} // first convert Color_type to Fl_Color
 
 		Color(int cc)
-			: c{Fl_Color{cc}}, v{visible}{}
+			: c{Fl_Color(cc)}, v(visible){}
 
 		Color(Transparency vv)
-			: c{Fl_Color{}}, v{vv}{}
+			: c{Fl_Color{}}, v(vv){}
 		
 		Color(Color_type cc, Transparency vv)
-			: c{Fl_Color{cc}}, v{vv}{}
+			: c{Fl_Color(cc)}, v(vv){}
 
 		// functions
 		void set_visibility(Transparency vv){
@@ -170,11 +226,11 @@ namespace Graph_lib{
 
 		enum Line_style_type{
 
-			solid = FL_SOLID;
-			dash = FL_DASH;
-			dot = FL_DOT;
-			dashdot = FL_DASHSOT;
-			dashdotdot = FL_DASHDOTDOT;
+			solid = FL_SOLID,
+			dash = FL_DASH,
+			dot = FL_DOT,
+			dashdot = FL_DASHDOT,
+			dashdotdot = FL_DASHDOTDOT
 
 		};
 
@@ -211,7 +267,7 @@ namespace Graph_lib{
 			symbol = FL_SYMBOL,
 			screen = FL_SCREEN,
 			screen_bold = FL_SCREEN_BOLD,
-			sapf_dingbats = FL_ZAPT_DINGBATS
+			sapf_dingbats = FL_ZAPF_DINGBATS
 
 		};
 
@@ -261,7 +317,7 @@ namespace Graph_lib{
 
 		// prevent copying
 		Shape(const Shape&) = delete; // delete copy constructor
-		Shape& operator=(const Shape&) = delete; // delte copy assignment
+		Shape& operator=(const Shape&) = delete; // delete copy assignment
 
 		// pure virtual destructor
 		virtual ~Shape(){} 
@@ -277,12 +333,12 @@ namespace Graph_lib{
 		 // default
 		Shape(){}
          // initializer_list constructor
-		Shape{initializer_list<Point> lst};
+		Shape(initializer_list<Point> lst);
 
 	private:
 		vector<Point> points;
-		Color lcolor{fl_color()}; // lcolor: for lines and texts
-								  // fl_Color: returns the last Fl_Color
+		Color lcolor = fl_color(); // lcolor: for lines and texts
+								  // fl_color: returns the last Fl_Color (unsigned int)
 		Line_style ls{0};
 		Color fcolor{Color::invisible}; // fcolor: for filling
 	};
@@ -401,7 +457,7 @@ namespace Graph_lib{
 
 	};
 
-	//----------------------------------------------------- Polygon
+	//----------------------------------------------------- Polygon (Closed_polygon without line crossing)
 	struct Polygon: Closed_polyline{
 
 		using Closed_polyline::Closed_polyline;
@@ -470,12 +526,12 @@ namespace Graph_lib{
 	private:
 		int r;
 
-	}
+	};
 
 	 // constructor
 	Circle::Circle(Point p, int rr)
 		:r{rr}{
-			add(Point{p.x-r,p.y-r}; // add top left corner
+			add(Point{p.x-r,p.y-r}); // add top left corner
 	}
 
 	//----------------------------------------------------- Ellipse
@@ -530,13 +586,13 @@ namespace Graph_lib{
 
 	 // constructors
 	Marked_polyline::Marked_polyline(const string& s)
-		:mark{m}{
-			if(m=="") mark="*"; // default mark: *
+		:mark{s}{
+			if(mark=="") mark="*"; // default mark: *
 	}
 
 	Marked_polyline::Marked_polyline(const string& s, initializer_list<Point> lst)
-		:Open_polyline{lst}, mark{m}{
-			if(m=="") mark="*";
+		:Open_polyline{lst}, mark{s}{
+			if(mark=="") mark="*";
 	}
 
 	//----------------------------------------------------- Marks: marks without lines connecting to them
@@ -566,7 +622,7 @@ namespace Graph_lib{
 		// constructor
 		Mark(Point xy, char c);
 
-	}
+	};
 
 	 // constructor
 	Mark::Mark(Point xy, char c)
@@ -591,8 +647,8 @@ namespace Graph_lib{
 		void draw_lines() const;
 
 	private:
-		int w, h; // define masking box within image relative to position cx, cy
-		int cx, cy;
+		int w, h; // define masking box within image with box's orgin at cx and cy which are local coordinates of the image
+		int cx, cy; 
 		Fl_Image* p;
 		Text fn;
 
@@ -602,29 +658,29 @@ namespace Graph_lib{
 	Image::Image(Point xy, string file_name, Suffix::Encoding e)
 		: w{0}, h{0}, fn{xy,""}{
 
-			add(xy);
+			add(xy); // origin/upperleft corner
 
-			if(!can_open(s)){
+			if(!can_open(file_name)){
 
-				fn.set_label("cannot open \""+s+'"');
+				fn.set_label("cannot open \""+file_name+'"');
 				p = new Bad_image(30,20); // struct Bad_image
 				return;
 
 			}
-			if(e==Suffix::none) e = get_encoding(s); // if can_open and didn't specify e
+			if(e==Suffix::none) e = get_encoding(file_name); // if can_open and didn't specify e
 
 			switch(e){
 
 				case Suffix::jpg:
-					p = new Fl_JPEG_Image{s.c_str()};
+					p = new Fl_JPEG_Image{file_name.c_str()};
 				break;
 
 				case Suffix::gif:
-					p = new Fl_GIF_Image{s.c_str()};
+					p = new Fl_GIF_Image{file_name.c_str()};
 				break;
 
 				default:
-					fn.set_label("unsupported file style\""+s+'"');
+					fn.set_label("unsupported file style\""+file_name+'"');
 					p = new Bad_image(30,20);
 
 			}
@@ -652,8 +708,58 @@ namespace Graph_lib{
 	};
 
 	 // constructor
-	Axis::Axis(Orientation d, Point xy, int number_of_notches, string lab)
+	Axis::Axis(Orientation d, Point xy, int length, int number_of_notches, string lab)
 		: label{Point(0,0),lab}{
+
+			if(length<0) error("bad axis length");
+
+			switch(d){
+
+				case Axis::x:
+
+					add(xy);
+					add(Point{xy.x+length,xy.y});
+
+					if(0<number_of_notches){ // first notch at xy.x+dist; last notch at xy.x+length
+
+						int dist = length/number_of_notches;
+						int x = xy.x + dist;
+
+						for(int i=0; i<number_of_notches; ++i){
+							notches.add(Point{x,xy.y},Point{x,xy.y-5});
+							x += dist;
+						}
+
+					}
+
+					label.move(length/3,xy.y+20); // put the label under the line
+					break;
+
+				case Axis::y:
+
+					add(xy);
+					add(Point{xy.x,xy.y-length});
+
+
+					if(0<number_of_notches){
+
+						int dist = length/number_of_notches;
+						int y = xy.y - dist;
+
+						for(int i=0; i<number_of_notches; ++i){
+							notches.add(Point{xy.x,y},Point{xy.x+5,y});
+							y -= dist;
+						}
+			
+					}
+
+					label.move(xy.x-10,xy.y-length-10); // put the label at the top
+					break;
+
+				case Axis::z:
+					error("z axis not implemented");
+
+			}
 
 	}
 
@@ -661,129 +767,27 @@ namespace Graph_lib{
 	struct Function: Shape{
 
 		// constructor
+		Function(Fct f, double r1, double r2, Point orig, int count=100, double xscale=25, double yscale=25);
 
 	};
 
+	 // constructor
+	Function::Function(Fct f, double r1, double r2, Point orig, int count, double xscale, double yscale){
+        // (0,0) at orig, plot the f from r1 to r2 relative to orig
 
-//------------------------------------------------------------------- Axis
+		if((r2-r1)<=0) error("bad graphing range");
+		if(count<=0) error("non-positive graphing count");
 
-Axis::Axis(Orientation d, Point xy, int length, int number_of_notches, string lab)
-	: label(Point(0,0),lab){
-
-		if(length<0) error("bad axis length");
-		
-		switch(d){
-		case Axis::x:{
-
-			Shape::add(xy);
-			Shape::add(Point(xy.x+length,xy.y));
-
-			if(0<number_of_notches){
-				
-				int dist = length/n;
-				int x = xy.x + dist;
-
-				for(int i=0; i<number_of_notches; ++i){
-					notches.add(Point(x,xy.y),Point(x,xy.y-5));
-					x += dist;
-				}
-			
-			}
-
-			label.move(length/3,xy.y+20); // put the label under the line
-			break;
-		}	
-		case Axis::y:{
-
-			Shape::add(xy);
-			Shape::add(Point(xy.x,xy.y-length));
-
-			if(0<number_of_notches){
-
-				int dist = length/n;
-				int y = xy.y - dist;
-
-				for(int i=0; i<number_of_notches; ++i){
-					notches.add(Point(xy.x,y),Point(xy.x+5,y));
-					y -= dist;
-				}
-			
-			}
-
-			label.move(xy.x-10,xy.y-length-10); // put the label at top
-			break;
-		}
-		case Axis::z:{
-			error("z axis not implemented");
+		double dist = (r2-r1)/count;
+		double r = r1;
+		for(int i=1; i<=count; ++i){
+			add(Point{orig.x+int(r*xscale), orig.y-int(f(r)*yscale)});
+			r += dist;
 		}
 
 	}
 
-
-}
-
-
-//------------------------------------------------------------------- Function
-
-struct Function: Shape{
-	//constructor
-	Function(Fct f, double r1, double r2, Point orig, int count=100, double xscale=25, double yscale=25);
-};
-
-Function::Function(Fct f, double r1, double r2, Point orig, int count, double xscale, double yscale){
-	
-	if(r2-r2<=0) error("bad graphing range");
-	if(count<=0) error("non-positive graphing count");
-	
-	double dist = (r2-r2)/count;
-	double r = r1;
-	for(int i=0; i<count; ++i){
-		add(Point(orig.x+int(r*xscale),orig.y-int(f(r)*yscale)));
-		r += dist;
-	}
-};
-
-
-
-//---------------------------------------------------------------------------- Distribution
-
-/*
-struct Distribution{
-	int year, young, middle, old;
-};
-
-istream& operator>>(istream& is, Distribution& d);
-
-class Scale{
-
-	int cbase;
-	int vbase;
-	double scale;
-public:
-	Scale(int b, int vb, double s) // constructor
-		: cbase(b), vbase(vb), scale(s){}
-	int operator()(int v) const { return cbase + (v-vbase)*scale; } // chapter 21.4
-
-};
-
-*/
-
-//----------------------------------------------------------- template
-/*
-template<class T> class Vector_ref{
-
-	public:
-		//...
-		void push_back(T&); // add a named object
-		void push_back(T*); // add an unnamed object
-
-		T& operator[](int i); // subscripting: read and write access
-		const T& operator[](int i) const;
-
-		int size() const;
-
-};
-*/
+} // Graph_lib
 
 #endif
 

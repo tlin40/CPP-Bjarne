@@ -24,18 +24,24 @@ namespace Graph_lib{
 			Widget(Point xy, int ww, int hh, const string& ss, Callback cb)
 				:loc(xy), width(ww), height(hh), label(ss), do_int(cb){}
 
-			// virtuals
-			//virtual void move(int dx, int dy); // move the Widget
-			//virtual void hide(); // make the Widget invisible
-			//virtual void show(); // make the Widget visible (default)
-			virtual void attach(Window&) = 0; // pure virtual function
-			//virtual void draw();
+			// destructor
+			virtual ~Widget(){}
 
+			// functions
+			virtual void move(int dx, int dy); // move the Widget
+			
+			virtual void hide(); // make the Widget invisible
+			
+			virtual void show(); // make the Widget visible (default)
+
+			virtual void attach(Window&) = 0; // pure virtual function
+			
+			// data
 			Point loc;
 			int width;
 			int height;
 			string label;
-			Callback do_int;
+			Callback do_int; // function pointer
 
 		protected:
 			Window* own; // every Widget belongs to a Window
@@ -52,40 +58,40 @@ namespace Graph_lib{
 			:Widget(xy, ww, hh, ss, cb){}
 
 		// function
-		//void attach(Window& w);
+		void attach(Window& w);
 
 	};
-
 
 	//--------------------------------------------------------------- In_box
 	struct In_box: Widget{
 
 		// constructor
-		//In_box(Point xy, int ww, int hh, const string& ss)
-		//	:Widget(xy, ww, hh, ss, 0){}
+		In_box(Point xy, int ww, int hh, const string& ss)
+			:Widget(xy, ww, hh, ss, 0){} // 0: nullptr
 
-		//int get_int();
+		// function
+		int get_int();
 
-		//string get_string();
+		string get_string();
 
-		//void attach(Window& w);
+		void attach(Window& w);
 
 	};
-
 
 	//--------------------------------------------------------------- Out_box
 
 	struct Out_box: Widget{ // present some message to users
 
 		// constructor
-//		Out_box(Point xy, int ww, int hh, const string& ss)
-//			:Widget(xy, ww, hh, ss, 0){}
+		Out_box(Point xy, int ww, int hh, const string& ss)
+			:Widget(xy, ww, hh, ss, 0){}
 
-//		void put(int);
+		// function
+		void put(int);
 
-//		void put(const string&);
+		void put(const string&);
 
-//		void attach(Window& w);
+		void attach(Window& w);
 
 	};
 

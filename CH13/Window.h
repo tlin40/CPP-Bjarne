@@ -6,7 +6,7 @@
 #include "Point.h"
 
 #include "GUI.h"
-#include "Graph.h"
+//#include "Graph.h"
 
 namespace Graph_lib{
 

@@ -98,7 +98,14 @@ namespace Graph_lib{
 		Shape::add(p);
 	}
 
-	//void Open_polyline::draw_lines() const{}
+	void Open_polyline::draw_lines() const{
+
+		if(color().visibility()){
+			for(int i=1; i<number_of_points(); i+=1)
+				fl_line(point(i-1).x,point(i-1).y,point(i).x,point(i).y);
+		}
+
+	}
 
 	//---------------------------------------------- Closed_polyline
 	void Closed_polyline::draw_lines() const{
@@ -138,7 +145,11 @@ namespace Graph_lib{
 		Closed_polyline::add(p);
 	}
 
-	// void Polygon::draw_lines() const{}
+	void Polygon::draw_lines() const{
+
+		if(number_of_points()<3) error("less than 3 points in a polygon"); 
+		Closed_polyline::draw_lines();
+	}
 
 	//----------------------------------------------- Rectangle
 	int Rectangle::height() const{
@@ -253,74 +264,50 @@ namespace Graph_lib{
 
 	void Image::draw_lines() const{
 
+		if(fn.label()!="") fn.draw_lines();
+
+		if(w&&h)
+			p->draw(point(0).x,point(0).y,w,h,cx,cy); // Fl_Image* p
+		else
+			p->draw(point(0).x,point(0).y);
+
 	}
 
 	//----------------------------------------------- Axis
 	void Axis::move(int dx, int dy){
 
+		// line
+		Shape::move(dx,dy);
+
+		// notches and label
+		notches.move(dx,dy);
+		label.move(dx,dy);
+
 	}
 
 	void Axis::set_color(Color c){
 
+		// line
+		Shape::set_color(c);
+
+		// notches and label
+		notches.set_color(c);
+		label.set_color(c);
+
 	}
 
 	void Axis::draw_lines() const{
+		
+		// line
+		if(color().visibility()) // points.size() should be 2
+			fl_line(points[1].x,point[0].y,points[1].x,points[1].y);
+
+		// notches and label
+		notches.draw();
+		label.draw();
 
 	}
 
-
-/*
-void Axis::draw_lines() const{ 
-	
-	// not only draws lines, but notches and label as well
-	Shape::draw_lines(); 
-	notches.draw();
-	label.draw();
-
 }
 
-void Axis::set_color(Color c){ 
-	
-	// not only sets lines, but notches and label as well
-	Shape::set_color(c);
-	notches.set_color(c);
-	label.set_color(c);
 
-}
-
-void Axis::move(int dx, int dy){
-
-	// not only moves lines, but notches and label as well
-	Shape::move(dx,dy);
-	notches.move(dx,dy);
-	label.move(dx,dy); 
-
-}
-
-/*
-
-//--------------------------------------------------- Distribution
-
-istream& operator>>(istream& is, Distribution& d){
-	char ch1 = 0;
-	char ch2 = 0;
-	char ch3 = 0;
-	Distribution dd;
-
-	if(is >> ch1 >> dd.year
-		  >> ch2 >> dd.young >> dd.middle >> dd.old 
-		  >> ch3){
-					if(ch1!='(' || ch2!=':' || ch3!=')'){
-						is.clear(ios_base::failbit);
-						return is;
-					}
-
-	}else{
-		return is;
-	}
-
-	d = dd;
-	return is;
-
-}
-*/
