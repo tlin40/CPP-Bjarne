@@ -6,7 +6,7 @@ namespace Graph_lib{
 	// Vector_ref
 	 // to handle new
 
-	template<typename T> class Vector_ref{
+	template<typename T> class Vector_ref{ // actually store addresses
 
 		// private
 		vector<T*> v;

@@ -6,7 +6,7 @@
 #include "Point.h"
 
 #include "GUI.h"
-//#include "Graph.h"
+#include "Graph.h"
 
 namespace Graph_lib{
 
@@ -112,8 +112,8 @@ namespace Graph_lib{
 				menu_button.show();
 			}
 
-			// callbacks
-			static void cb_red(Address, Address); // callback for red button
+			// callback functions
+			static void cb_red(Address, Address); // callback function for red button
 			static void cb_blue(Address, Address);
 			static void cb_black(Address, Address);
 			static void cb_menu(Address, Address);

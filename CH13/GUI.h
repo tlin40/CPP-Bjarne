@@ -13,7 +13,7 @@ namespace Graph_lib{
 	 // here the function is a void function and takes arguments as Address, Address
 	 // example: Callback pf = &f; *pf(addr, addr);
 
-	template<typename W> W& reference_to(Address addr){
+	template<typename W> W& reference_to(Address addr){ // addr is a pointer
 		return *static_cast<W*>(addr);
 	}
 
@@ -41,11 +41,12 @@ namespace Graph_lib{
 			int width;
 			int height;
 			string label;
-			Callback do_int; // function pointer
+			Callback do_int; // function pointer or function name
+			                  // function name can be viewed as an address
 
 		protected:
 			Window* own; // every Widget belongs to a Window
-			Fl_Widget* pw; // connection to Fl_Widget
+			Fl_Widget* pw; // connection to Fl_Widget; assinged from derived class
 
 	};
 
@@ -62,10 +63,9 @@ namespace Graph_lib{
 
 	};
 
-	//--------------------------------------------------------------- In_box
+	//--------------------------------------------------------------- In_box (user can type a string)
 	struct In_box: Widget{
 
-		// constructor
 		In_box(Point xy, int ww, int hh, const string& ss)
 			:Widget(xy, ww, hh, ss, 0){} // 0: nullptr
 
@@ -78,7 +78,7 @@ namespace Graph_lib{
 
 	};
 
-	//--------------------------------------------------------------- Out_box
+	//--------------------------------------------------------------- Out_box (program displays a string)
 
 	struct Out_box: Widget{ // present some message to users
 
@@ -97,55 +97,35 @@ namespace Graph_lib{
 
 
 	//--------------------------------------------------------------- Menu
-	 // basically a vector of Buttons
+	 // basically a vector of Buttons, a collection of Widgets
 	struct Menu: Widget{
 
-		void hide(){
-
-		};
-
-		/*
+		enum Kind{ horizontal, vertical };
 
 		// constructor
-		Menu::Menu(Point xy, int ww, int hh, Kind kk, const string& ss)
-			:Widget(xy,ww,hh,ss,0), k(kk), offest(0){}
+		Menu(Point xy, int ww, int hh, Kind kk, const string& ss)
+			:Widget{xy,ww,hh,ss,0}, k{kk}, offset{0}{}
 
-		//data
-		enum Kind{ horizontal, vertical };
+		// functions
+		int attach(Button& b);
+		
+		int attach(Button* p);
+
+		// virtual functions
+		void move(int dx, int dy); // move all buttons
+
+		void show(); // show all buttons
+
+		void hide(); // hide all buttons
+
+		void attach(Window& w); // attach all buttons to Window
+
+		// data
 		Kind k;
 		int offset;
 		Vector_ref<Button> selection;
 
-		//int attach(Button& b);
-
-		//int attach(Button* p);
-
-		// virtuals 
-		void move(int dx, int dy){ // move all buttons
-			for(Button& b: selection) b.move(dx,dy);
-		} 
-
-		void show(){ // show all buttons
-			for(Button& b: selection) b.show();
-		}
-
-		// functions
-
-		void hide(){ // hide all buttons
-			for(Button& b: selection) b.hide();
-
-		}
-
-		void attach(Window& w){ // attach all buttons to Window
-			for(Button& b: selection) w.attach(b);
-			own = &w;
-		}
-
-		*/
-
-
 	};
-
 
 }
 
