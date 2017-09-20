@@ -1,5 +1,8 @@
 #ifndef GRAPH_GUARD
-#define GRAPH_GUARD
+#define GRAPH_GUARD 1
+
+#include "fltk.h"
+#include "Point.h"
 
 namespace Graph_lib{
 
@@ -84,7 +87,7 @@ namespace Graph_lib{
 	}
 	  // from above, if intersect, returns true if the two segments intersect
 	   // also return Point intersection 
-	 bool line_segment_intersect(Point p1, Point p2, Point p3, Point p4, Point& intersection){
+	bool line_segment_intersect(Point p1, Point p2, Point p3, Point p4, Point& intersection){
 
 	 	bool parallel;
 	 	pair<double,double> u = line_intersect(p1,p2,p3,p4,parallel);
@@ -94,7 +97,7 @@ namespace Graph_lib{
 	 	intersection.y = p1.y + u.first*(p2.y - p1.y);
 	 	return true;
 
-	 };
+	 }
 
 	 // draw_mark
 	void draw_mark(Point xy, char c){
@@ -302,7 +305,7 @@ namespace Graph_lib{
 
 		// set and read fcolor
 		void set_fill_color(Color col);
-		Color fill_Color() const;
+		Color fill_color() const;
 
 		// read points[i] and the number of points
 		Point point(int i) const; // read points[i]
@@ -715,7 +718,7 @@ namespace Graph_lib{
 
 			switch(d){
 
-				case Axis::x:
+				case Axis::x://{
 
 					add(xy);
 					add(Point{xy.x+length,xy.y});
@@ -734,8 +737,9 @@ namespace Graph_lib{
 
 					label.move(length/3,xy.y+20); // put the label under the line
 					break;
+				//}
 
-				case Axis::y:
+				case Axis::y://{
 
 					add(xy);
 					add(Point{xy.x,xy.y-length});
@@ -755,6 +759,7 @@ namespace Graph_lib{
 
 					label.move(xy.x-10,xy.y-length-10); // put the label at the top
 					break;
+				//}
 
 				case Axis::z:
 					error("z axis not implemented");

@@ -20,7 +20,7 @@ namespace Graph_lib{
     //------------------------------------------------- Button
     void Button::attach(Window& w){ // called by Window::attach
 
-        pw = new Fl_Button(loc.x,loc.y,witdth,height,label.c_str());
+        pw = new Fl_Button(loc.x,loc.y,width,height,label.c_str());
         pw->callback(reinterpret_cast<Fl_Callback*>(do_int),&w); // reinterpret the underlying bit pattern
         own = &w;
 
@@ -69,69 +69,6 @@ namespace Graph_lib{
     void Out_box::attach(Window& w){
 
         pw = new Fl_Output(loc.x,loc.y,width,height,label.c_str());
-        own = &w;
-
-    }
-
-    //------------------------------------------------ Menu
-    int Menu::attach(Button& b){
-
-        b.width = width;
-        b.height = height;
-
-        switch(k){
-
-            case horizontal:
-
-                b.loc = Point{loc.x+offset,loc.y};
-                offset += b.wodth;
-                break;
-
-            case vertical:
-
-                b.loc = Point{loc.x,loc.y+offset};
-                offset += b.height;
-                break;
-
-        }
-
-        selection.push_back(&b); // attach addresses
-
-        return int(selection.size()-1);
-
-    }
-
-    int Menu::attach(Button* p){
-
-        return attach(*p);
-
-    }
-
-    void Menu::move(int dx, int dy){
-
-        for(int i=0; i<selection.size(); ++i)
-            selection[i].move(dx,dy);
-
-    }
-
-    void Menu::show(){
-
-        for(int i=0; i<selection.size(); ++i)
-            selection[i].show();
-
-    }
-
-    void Menu::hide(){
-
-        for(int i=0; i<selection.size(); ++i)
-            selection[i].hide();
-
-    }
-
-    void Menu::attach(Window& w){
-
-        for(int i=0; i<selection.size(); ++i)
-            w.attach(selection[i]);
         own = &w;
 
     }

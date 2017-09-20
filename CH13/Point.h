@@ -1,10 +1,14 @@
 #ifndef POINT_GUARD
-#define POINT_GUARD
+#define POINT_GUARD 1
+
+#include "std_lib_facilities.h"
 
 namespace Graph_lib{
 
 	//------------------------------------------ Point
 	struct Point{
+
+
 
 		// coordinates
 		int x;
@@ -12,11 +16,11 @@ namespace Graph_lib{
 
 		// default constructor
 		Point()
-			:x(0), y(0){}
+			:x{0}, y{0}{}
 
 		// constructor
 		Point(int xx, int yy)
-			:x(xx), y(yy){}
+			:x{xx}, y{yy}{}
 
 	};
 
@@ -32,3 +36,4 @@ namespace Graph_lib{
 }
 
 #endif
+

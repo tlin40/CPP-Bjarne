@@ -111,7 +111,7 @@ namespace Graph_lib{
 
 		Open_polyline::draw_lines();
 
-		if(2<number_of_points() && color.visibility())
+		if(2<number_of_points() && color().visibility())
 			fl_line(point(number_of_points()-1).x,
 					point(number_of_points()-1).y,
 					point(0).x,
@@ -133,7 +133,7 @@ namespace Graph_lib{
 
 		}
 
-		for(int i=1, i<np-1, ++i){
+		for(int i=1; i<np-1; ++i){
 			
 			Point ignore(0,0); // point of intersection
 			if(line_segment_intersect(point(np-1),p,point(i-1),point(i),ignore))
@@ -214,7 +214,7 @@ namespace Graph_lib{
 
 	Point Ellipse::center() const{
 
-		return Point{point(0).x+w,point(0)+h};
+		return Point{point(0).x+w,point(0).y+h};
 
 	}
 
@@ -299,7 +299,7 @@ namespace Graph_lib{
 		
 		// line
 		if(color().visibility()) // points.size() should be 2
-			fl_line(points[1].x,point[0].y,points[1].x,points[1].y);
+			fl_line(point(1).x,point(0).y,point(1).x,point(1).y);
 
 		// notches and label
 		notches.draw();

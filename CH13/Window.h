@@ -1,14 +1,39 @@
 #ifndef WINDOW_GUARD
 #define WINDOW_GUARD 1
 
-#include "fltk.h"
-#include "std_lib_facilities.h"
-#include "Point.h"
-
 #include "GUI.h"
-#include "Graph.h"
 
 namespace Graph_lib{
+	//--------------------------------------------------------------- Menu
+	 // basically a vector of Buttons, a collection of Widgets
+	struct Menu: Widget{
+
+		enum Kind{ horizontal, vertical };
+
+		// constructor
+		Menu(Point xy, int ww, int hh, Kind kk, const string& ss)
+			:Widget{xy,ww,hh,ss,0}, k{kk}, offset{0}{}
+
+		// functions
+		int attach(Button& b);
+		
+		int attach(Button* p);
+
+		// virtual functions
+		void move(int dx, int dy); // move all buttons
+
+		void show(); // show all buttons
+
+		void hide(); // hide all buttons
+
+		void attach(Window& w); // attach all buttons to Window
+
+		// data
+		Kind k;
+		int offset;
+		Vector_ref<Button> selection;
+
+	};
 
 	//--------------------------------------------------------------- Window
 	class Window: public Fl_Window{
