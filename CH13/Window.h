@@ -68,12 +68,9 @@ namespace Graph_lib{
 			void put_on_top(Shape& p); // put p on top of other Shapes
 
 			// const functions
-			int x_max() const{
-				return w;
-			}
-			int y_max() const{
-				return h;
-			}
+			int x_max() const;
+
+			int y_max() const;
 		
 		protected:
 			void draw();
@@ -83,30 +80,6 @@ namespace Graph_lib{
 			vector<Shape*> shapes; // Shapes attached to Window
 			void init();
 	};
-
-	// constructor
-	Window::Window(int ww, int hh, const string& title)
-		:Fl_Window(ww,hh,title.c_str()),w(ww),h(hh){
-			init();
-	}
-
-	Window::Window(Point xy, int ww, int hh, const string& title)
-		:Fl_Window(xy.x,xy.y,ww,hh,title.c_str()),w(ww),h(hh){
-			init();
-	}
-
-	//-------------------------------------------------------------- helper functions
-	int gui_main(){ // invoke GUI library's main event loop
-		return Fl::run();
-	}; 
-
-	int x_max(){ // width of screen in pixels
-		return Fl::w(); 
-	}
-
-	int y_max(){ // height of screen in pixels
-		return Fl::h(); 
-	}
 
 	//------------------------------------------------------------- Lines_window
 	struct Lines_window: Window{
@@ -154,34 +127,6 @@ namespace Graph_lib{
 			void quit(); // to delet the Window
 
 	};
-
-	// constructor
-	Lines_window::Lines_window(Point xy, int ww, int hh, const string& ss)
-		:Window{xy, ww, hh, ss},
-		 menu_button{Point{x_max()-80,30}, 80, 20, "Color menu", cb_menu},
-		 next_button{Point{x_max()-150,0}, 70, 20, "Next point", cb_next},
-		 quit_button{Point{x_max()-70,0}, 70, 20, "Quit", cb_quit},
-		 next_x{Point{x_max()-310,0}, 50, 20, "next x:"},
-		 next_y{Point{x_max()-210,0}, 50, 20, "next y:"},
-		 xy_out{Point{100,0}, 100, 20, "current (x,y):"},
-		 color_menu{Point(x_max()-70,30), 70, 20, Menu::vertical, "color"}{
-
-		 	color_menu.attach(new Button(Point(0,0), 0, 0, "red", cb_red));
-		 	color_menu.attach(new Button(Point(0,0), 0, 0, "blue", cb_blue));
-		 	color_menu.attach(new Button(Point(0,0), 0, 0, "black", cb_black));
-		 	attach(color_menu);
-		 	attach(menu_button);
-		 	color_menu.hide();
-
-		 	attach(next_button);
-		 	attach(quit_button);
-		 	attach(next_x);
-		 	attach(next_y);
-		 	attach(xy_out);
-		 	xy_out.put("no point");
-		 	
-		 	attach(lines);
-	}
 
 }
 

@@ -65,51 +65,13 @@ namespace Graph_lib{
 	// helper functions
 	 // does two lines (p1, p2) and (p3, p4) intersect?
 	  // if so, return the distances of the intersect point from p1 to p2s and from p3 to p4
-	pair<double,double> line_intersect(Point p1, Point p2, Point p3, Point p4, bool& parallel){ // inline function can be dedined more than once
-		double x1 = p1.x;
-		double x2 = p2.x;
-		double x3 = p3.x;
-		double x4 = p4.x;
-		double y1 = p1.y;
- 		double y2 = p2.y;
-		double y3 = p3.y;
-		double y4 = p4.y;
-
-		double denom = (y4-y3)*(x2-x1) - (x4-x3)*(y2-y1); // check if parallel
-		if(denom == 0){
-			parallel = true;
-			return pair<double,double>(0,0); // return (0,0)
-		}
-		parallel = false;
-		return pair<double,double>{((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3))/denom,
-								   ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3))/denom};
-
-	}
+	pair<double,double> line_intersect(Point p1, Point p2, Point p3, Point p4, bool& parallel);
 	  // from above, if intersect, returns true if the two segments intersect
 	   // also return Point intersection 
-	bool line_segment_intersect(Point p1, Point p2, Point p3, Point p4, Point& intersection){
-
-	 	bool parallel;
-	 	pair<double,double> u = line_intersect(p1,p2,p3,p4,parallel);
-
-	 	if(parallel || u.first<0 || u.first>1 || u.second<0 || u.second>1) return false; // not parallel
-	 	intersection.x = p1.x + u.first*(p2.x - p1.x);
-	 	intersection.y = p1.y + u.first*(p2.y - p1.y);
-	 	return true;
-
-	 }
+	bool line_segment_intersect(Point p1, Point p2, Point p3, Point p4, Point& intersection);
 
 	 // draw_mark
-	void draw_mark(Point xy, char c){
-
-		constexpr int dx = 4; // to center the letter over the point
-		constexpr int dy = 4;
-
-		string m{1,c}; // fill the string with one c
-
-		fl_draw(m.c_str(),xy.x-dx,xy.y+dy);
-
-	}
+	void draw_mark(Point xy, char c);
 
 	// for Image
 	struct Suffix{
@@ -131,41 +93,11 @@ namespace Graph_lib{
 
 	};
 
-	bool can_open(const string& s){
-		ifstream ff{s};
-		return static_cast<bool>(ff); // here requires explicit conversion
-	}
+	bool can_open(const string& s);
 
-	map<string,Suffix::Encoding> suffix_map;
+	int init_suffix_map();
 
-	int init_suffix_map(){
-
-		suffix_map["jpg"] = Suffix::jpg;
-		suffix_map["JPG"] = Suffix::jpg;
-		suffix_map["jpeg"] = Suffix::jpg;
-		suffix_map["JPEG"] = Suffix::jpg;
-		
-		suffix_map["gif"] = Suffix::gif;
-		suffix_map["GIF"] = Suffix::gif;
-		
-		suffix_map["bmp"] = Suffix::bmp;
-		suffix_map["BMP"] = Suffix::bmp;
-
-		return 0; 
-
-	}
-
-	Suffix::Encoding get_encoding(const string& s){
-		// try to deduce type
-		static int x = init_suffix_map(); // initialize suffix_map once
-
-		string::const_iterator p = find(s.begin(),s.end(),'.'); // to find '.' in the range [first,last)
-		if(p==s.end()) return Suffix::none;
-
-		string suf{p+1,s.end()}; // range constructor [first,last)
-		return suffix_map[suf];
-
-	}
+	Suffix::Encoding get_encoding(const string& s);
 
 	//------------------------------------------------------- Color
 	struct Color{
@@ -329,7 +261,7 @@ namespace Graph_lib{
 		void add(Point p); // protected
 		void set_point(int i, Point p); // set points[i]
 
-		// pure virtual draw_lines()
+		// virtual draw_lines()
 		virtual void draw_lines() const; // draw lines (pixels on the screen)
 
 		// constructor
@@ -345,11 +277,6 @@ namespace Graph_lib{
 		Line_style ls{0};
 		Color fcolor{Color::invisible}; // fcolor: for filling
 	};
-
-	 // initializer_list constructor
-	Shape::Shape(initializer_list<Point> lst){
-		for(Point p: lst) add(p);
-	}
 
 	//------------------------------------------------------- Text
 	struct Text: Shape{
@@ -405,11 +332,6 @@ namespace Graph_lib{
 
 	};
 
-	Line::Line(Point p1, Point p2){
-		add(p1);
-		add(p2);
-	}
-
 	//----------------------------------------------------- Lines
 	struct Lines: Shape{
 
@@ -426,12 +348,6 @@ namespace Graph_lib{
 
 		void draw_lines() const;
 	};
-
-	Lines::Lines(initializer_list<pair<Point,Point>> lst){
-
-		for(auto p: lst) add(p.first,p.second); // pair and initializer_list are defined in the std library
-
-	}
 
 	//----------------------------------------------------- Open_polyline
 	struct Open_polyline: Shape{
@@ -492,23 +408,6 @@ namespace Graph_lib{
 
 	};
 
-	// constructors
-	Rectangle::Rectangle(Point xy, int ww, int hh)
-		:w{ww}, h{hh}{
-			
-			if(h<=0 || w<=0) error("Bad rectangle: non-positive side");
-			add(xy);
-
-	}
-
-	Rectangle::Rectangle(Point x, Point y)
-		: w{y.x-x.x}, h{y.y-x.y}{
-
-		if(h<=0 || w<=0) error("Bad rectangle: non-positive width or height");
-		add(x);
-
-	}
-
 	//----------------------------------------------------- Circle
 	struct Circle: Shape{
 
@@ -530,12 +429,6 @@ namespace Graph_lib{
 		int r;
 
 	};
-
-	 // constructor
-	Circle::Circle(Point p, int rr)
-		:r{rr}{
-			add(Point{p.x-r,p.y-r}); // add top left corner
-	}
 
 	//----------------------------------------------------- Ellipse
 	struct Ellipse: Shape{
@@ -565,12 +458,6 @@ namespace Graph_lib{
 
 	};
 
-	 // constructor
-	Ellipse::Ellipse(Point p, int ww, int hh)
-		:w{ww}, h{hh}{
-			add(Point{p.x-w,p.y-h}); // add top left corner
-	}
-
 	//----------------------------------------------------- Marked_polyline
 	struct Marked_polyline: Open_polyline{
 
@@ -587,17 +474,6 @@ namespace Graph_lib{
 
 	};
 
-	 // constructors
-	Marked_polyline::Marked_polyline(const string& s)
-		:mark{s}{
-			if(mark=="") mark="*"; // default mark: *
-	}
-
-	Marked_polyline::Marked_polyline(const string& s, initializer_list<Point> lst)
-		:Open_polyline{lst}, mark{s}{
-			if(mark=="") mark="*";
-	}
-
 	//----------------------------------------------------- Marks: marks without lines connecting to them
 	struct Marks: Marked_polyline{
 
@@ -608,17 +484,6 @@ namespace Graph_lib{
 
 	};
 
-	 // constructors
-	Marks::Marks(const string& s)
-		: Marked_polyline{s}{
-			set_color(Color{Color::invisible});
-		}
-
-	Marks::Marks(const string& s, initializer_list<Point> lst)
-		: Marked_polyline{s,lst}{
-			set_color(Color{Color::invisible});
-		}
-
 	//----------------------------------------------------- Mark
 	struct Mark: Marks{
 
@@ -626,12 +491,6 @@ namespace Graph_lib{
 		Mark(Point xy, char c);
 
 	};
-
-	 // constructor
-	Mark::Mark(Point xy, char c)
-		:Marks{string{1,c}}{
-			add(xy);
-		}
 
 	//----------------------------------------------------- Image
 	struct Image: Shape{
@@ -657,38 +516,6 @@ namespace Graph_lib{
 
 	};
 
-	 // constructor
-	Image::Image(Point xy, string file_name, Suffix::Encoding e)
-		: w{0}, h{0}, fn{xy,""}{
-
-			add(xy); // origin/upperleft corner
-
-			if(!can_open(file_name)){
-
-				fn.set_label("cannot open \""+file_name+'"');
-				p = new Bad_image(30,20); // struct Bad_image
-				return;
-
-			}
-			if(e==Suffix::none) e = get_encoding(file_name); // if can_open and didn't specify e
-
-			switch(e){
-
-				case Suffix::jpg:
-					p = new Fl_JPEG_Image{file_name.c_str()};
-				break;
-
-				case Suffix::gif:
-					p = new Fl_GIF_Image{file_name.c_str()};
-				break;
-
-				default:
-					fn.set_label("unsupported file style\""+file_name+'"');
-					p = new Bad_image(30,20);
-
-			}
-	}
-
 	//----------------------------------------------------- Axis
 	struct Axis: Shape{
 
@@ -710,63 +537,6 @@ namespace Graph_lib{
 
 	};
 
-	 // constructor
-	Axis::Axis(Orientation d, Point xy, int length, int number_of_notches, string lab)
-		: label{Point(0,0),lab}{
-
-			if(length<0) error("bad axis length");
-
-			switch(d){
-
-				case Axis::x://{
-
-					add(xy);
-					add(Point{xy.x+length,xy.y});
-
-					if(0<number_of_notches){ // first notch at xy.x+dist; last notch at xy.x+length
-
-						int dist = length/number_of_notches;
-						int x = xy.x + dist;
-
-						for(int i=0; i<number_of_notches; ++i){
-							notches.add(Point{x,xy.y},Point{x,xy.y-5});
-							x += dist;
-						}
-
-					}
-
-					label.move(length/3,xy.y+20); // put the label under the line
-					break;
-				//}
-
-				case Axis::y://{
-
-					add(xy);
-					add(Point{xy.x,xy.y-length});
-
-
-					if(0<number_of_notches){
-
-						int dist = length/number_of_notches;
-						int y = xy.y - dist;
-
-						for(int i=0; i<number_of_notches; ++i){
-							notches.add(Point{xy.x,y},Point{xy.x+5,y});
-							y -= dist;
-						}
-			
-					}
-
-					label.move(xy.x-10,xy.y-length-10); // put the label at the top
-					break;
-				//}
-
-				case Axis::z:
-					error("z axis not implemented");
-
-			}
-
-	}
 
 	//----------------------------------------------------- Function
 	struct Function: Shape{
@@ -775,22 +545,6 @@ namespace Graph_lib{
 		Function(Fct f, double r1, double r2, Point orig, int count=100, double xscale=25, double yscale=25);
 
 	};
-
-	 // constructor
-	Function::Function(Fct f, double r1, double r2, Point orig, int count, double xscale, double yscale){
-        // (0,0) at orig, plot the f from r1 to r2 relative to orig
-
-		if((r2-r1)<=0) error("bad graphing range");
-		if(count<=0) error("non-positive graphing count");
-
-		double dist = (r2-r1)/count;
-		double r = r1;
-		for(int i=1; i<=count; ++i){
-			add(Point{orig.x+int(r*xscale), orig.y-int(f(r)*yscale)});
-			r += dist;
-		}
-
-	}
 
 } // Graph_lib
 

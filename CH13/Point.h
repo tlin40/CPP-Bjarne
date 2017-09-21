@@ -8,8 +8,6 @@ namespace Graph_lib{
 	//------------------------------------------ Point
 	struct Point{
 
-
-
 		// coordinates
 		int x;
 		int y;
@@ -25,13 +23,9 @@ namespace Graph_lib{
 	};
 
 	//------------------------------------------ operators for Points
-	bool operator==(Point a, Point b){
-		return a.x==b.x && a.y==b.y;
-	}
+	bool operator==(Point a, Point b);
 
-	bool operator!=(Point a, Point b){
-		return !(a==b);
-	}
+	bool operator!=(Point a, Point b);
 
 }
 
