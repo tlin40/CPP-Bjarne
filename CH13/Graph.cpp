@@ -171,6 +171,14 @@ namespace Graph_lib{
 		add(p2);
 	}
 
+	void Line::draw_lines() const{
+
+		if(color().visibility()){
+			fl_line(point(0).x,point(0).y,point(1).x,point(1).y);
+		}
+	
+	}
+
 	//---------------------------------------------- Lines
 	Lines::Lines(initializer_list<pair<Point,Point>> lst){
 

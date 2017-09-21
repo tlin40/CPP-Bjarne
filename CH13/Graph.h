@@ -330,6 +330,9 @@ namespace Graph_lib{
 		// constructor
 		Line(Point p1, Point p2);
 
+		// functions
+		void draw_lines() const;
+
 	};
 
 	//----------------------------------------------------- Lines
